@@ -14,28 +14,17 @@
 struct territory
 {
     char * pterritoryName;
-    char * plistEthnicities; // A list of the ethnical groups who inhabit this area
-    //int * ppopulationNumber;
+    char * plistEthnicities;
     int populationNumber;
     float productivity;
     int income;
-    int coinInCoffers; // The money is all stored in the capital for better protection. This is why it's not in the faction struct
-    // A little workaround I came up with hahaha
+    int coinInCoffers;
     int costRecruitSoldiers; // 1 soldier = 2 gold coins
-    //float * pproductivity; // Measured by time in hours for one indiviual. Counted by the mean of the population.
-    // For example, if the productivity is 30h, it means that one worker produces the equivalent of 30 workers in the lowest
-    // productivity possible. Lowest productivity possible is 1 worker = 1h
-    //float * pincome; // productivity multiplied populationNumber. Measured in gold coins.
-
-    // Include squalor, money in the bank (to be looted by the invading army) and other things in the future?
+    float pproductivity; // Measured by time in hours for one indiviual. Counted by the mean of the population.
 };
 
 struct battleOverStruct
 {
-    //_Bool * battleOver;
-    //_Bool * battleWon;
-    //_Bool battleOver;
-    //_Bool battleWon;
     int battleOver;
     int battleWon;
 };
