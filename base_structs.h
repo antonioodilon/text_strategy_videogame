@@ -7,9 +7,6 @@
 #include <math.h>
 #include <stddef.h>
 
-//struct army ankarasRighteous;
-//struct army konstaninosFaithful;
-
 // Structs:
 struct territory
 {
