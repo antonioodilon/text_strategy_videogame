@@ -1030,6 +1030,7 @@ int befBattlePlayNums, int befBattleEnNums)
     penemyStruct->numbers -= enemySoldLeft;
     int tempGoldInPossession;
     int ransomMoney;
+    float noEnemyLeftStren;
 
     int continueNumber;
 
@@ -1045,10 +1046,8 @@ int befBattlePlayNums, int befBattleEnNums)
             penemyStruct->baggageTrain, pplayerStruct->baggageTrain);
 
             tempGoldInPossession = penemyStruct->baggageTrain;
-            //pplayerStruct->baggageTrain += penemyStruct->baggageTrain;
 
             printf("Now the amount of gold in your possession is %d!\n", tempGoldInPossession);
-            //printf("Now the amount of gold in your possession is %d!\n", pplayerStruct->baggageTrain);
         } else if (penemyStruct->baggageTrain <= 0)
         {
             penemyStruct->baggageTrain = 0;
@@ -1117,18 +1116,19 @@ int befBattlePlayNums, int befBattleEnNums)
                 }else
                 {
                     printf("Please type in a valid answer.\n");
+                    // There is a bug here that needs to be addressed. If the user types a letter
+                    // instead of an integer number, the program keeps looping infinitely
                 };
             };
         } else {
             enemySoldLeft = 0;
-            noEnemyLeftStren = 150;
+            noEnemyLeftStren = 150.0;
             printf("My lord, it seems that the enemy's soldiers were all slaughtered to the last man by our forces"
             " during the battle! This is a complete victory indeed!\n");
             pplayerStruct->strength += noEnemyLeftStren;
             printf("\n============\n");
-            printf("As a result of this, our army has gained an addition %d points of strength, bringing our total"
-            " strength to %d!\n", noEnemyLeftStren, pplayerStruct->strength);
-            // Player gets the same amount of strength as it would get if it slaughtered the prisoners
+            printf("As a result of this, our army has gained an addition %.2f points of strength, bringing our total"
+            " strength to %.2f!\n", noEnemyLeftStren, pplayerStruct->strength);
         };
 
         printf("Temporary gold in possession BEFORE: %d\n", tempGoldInPossession);
@@ -1139,7 +1139,6 @@ int befBattlePlayNums, int befBattleEnNums)
         {
             int choiceExtraGold;
             int moneyToBaggTrain;
-            //int moneyToCoffers;
 
             printf("Press any number to continue: ");
             scanf("%d", &continueNumber);
@@ -1220,9 +1219,10 @@ int befBattlePlayNums, int befBattleEnNums)
         };
 
         printf("My lord, now it is time to return to our capital and rejoice for this glorious victory!\n");
+    // IMPORTANT!!! Create a loop here. For every battle won, award 1 experience to the player and increase
+    // the defense and attack by 1.
     } else if (paftermathBattleStructParam->battleWon == 0)
     {
-        // Will be implemented in the future.
         printf("The battle has been lost! You have been utterly defeated\n");
     };
 };
