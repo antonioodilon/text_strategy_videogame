@@ -356,3 +356,873 @@ struct army createsPlayerArmy(void)
 
     return inputPlayersArmy;
 };
+
+int resultingDamage(int attack, int defense)
+{
+    if ((attack - defense) > 0)
+    {
+        return attack - defense;
+    } else
+    {
+        return 0;
+    };
+};
+
+
+struct battleOverStruct checkBattleOver(int currPlayersNum, int currEnemyNums,
+int currPlayersStrength, int initPlayersStrength, int currEnemysStrength, int initEnemysStrength)
+{
+    struct battleOverStruct isBattleOver;
+    int minimumBattleStrength;
+
+    if (initPlayersStrength <= initEnemysStrength)
+    {
+        minimumBattleStrength = initPlayersStrength/2;
+    } else {
+        minimumBattleStrength = initEnemysStrength/2;
+    };
+
+    if (currPlayersNum <= 0 || currPlayersStrength <= minimumBattleStrength)
+    {
+        printf("The battle is over!\n");
+        if (currPlayersNum <= 0)
+        {
+            currPlayersNum = 0;
+            printf("However, our soldiers have bravely fought to the last man! True heroes indeed!\n");
+        } else
+        {
+            printf("You have been beaten and your soldiers are routing! ");
+            printf("Shameful display!\n");
+        };
+        isBattleOver.battleOver = 1;
+        isBattleOver.battleWon = 0;
+        return isBattleOver;
+
+    } else if (currEnemyNums <= 0 || currEnemysStrength <= minimumBattleStrength)
+    {
+        printf("The battle is over!\n");
+        if (currEnemyNums <= 0)
+        {
+            currEnemyNums = 0;
+            printf("But the enemy isn't as weak as we had initially thought: their soldiers fought"
+            " to the last man! Admirable foes indeed!\n");
+        } else
+        {
+            printf("Victory! The enemy runs like the worthless rabid dog it is!\n");
+        };
+        isBattleOver.battleOver = 1;
+        isBattleOver.battleWon = 1;
+        return isBattleOver;
+
+    } else {
+        isBattleOver.battleOver = 0;
+        isBattleOver.battleWon = 0;
+        return isBattleOver;
+    };
+};
+
+
+struct battleOverStruct battle(struct army * pplayersArmy, struct army * penemyArmy)
+{
+    int continueNumber;
+    int startBattle;
+    int turnNumber;
+    int initialPlayersNumbers = pplayersArmy->numbers;
+    int initialEnemysNumbers = penemyArmy->numbers;
+    float initialPlayersStrength =  pplayersArmy->strength;
+    float initialEnemysStrength = penemyArmy->strength;
+    struct battleOverStruct battleIsOver;
+
+    printf("A battle is about to start! You have %d soldiers against the enemy's %d soldiers!\n", initialPlayersNumbers, initialEnemysNumbers);
+    printf("Your army's strength is %.2f!\nYour enemy's strength is %.2f!\n", initialPlayersStrength, initialEnemysStrength);
+    printf("Press any integer number to start the combat: ");
+    scanf("%d", &startBattle);
+
+    turnNumber = 0;
+    while (true)
+    {
+        int playerValAttack;
+        int playerValDefense;
+        int enemyValAttack;
+        int enemyValDefense;
+        int damageAgainstEnemy;
+        int damageAgainstPlayer;
+        int damAgainstEnComm;
+        int damAgainstPlayComm;
+
+        ++turnNumber;
+        printf("\n============\n");
+        printf("\nStarting turn number %d\n", turnNumber);
+        printf("\n============\n");
+
+        printf("Press an integer number to roll the dice for an attack against the enemy: ");
+        scanf("%d", &continueNumber);
+        playerValAttack = getRandValueFromRange(&pplayersArmy->minAttack, &pplayersArmy->maxAttack);
+        printf("You roll the dice and your attack is %d!\n", playerValAttack);
+
+        printf("Press any number to continue...");
+        scanf("%d", &continueNumber);
+
+        printf("The enemy rolls a dice to defend! ");
+        enemyValDefense = getRandValueFromRange(&penemyArmy->minDefense, &penemyArmy->maxDefense);
+        printf("Its defense is %d!\n", enemyValDefense);
+
+        printf("Press any number to continue...");
+        scanf("%d", &continueNumber);
+
+        damageAgainstEnemy = resultingDamage(playerValAttack, enemyValDefense)*50;
+        damAgainstEnComm = resultingDamage(playerValAttack, enemyValDefense);
+        if (damageAgainstEnemy > 0)
+        {
+            printf("The resulting damage against the worthless enemy is %d!\n", damageAgainstEnemy);
+            (penemyArmy->numbers) -= damageAgainstEnemy;
+            (penemyArmy->commandersPoints) -= damAgainstEnComm;
+            (penemyArmy->strength) = (penemyArmy->numbers * (penemyArmy->experience/2)) + penemyArmy->commandersPoints;
+        } else
+        {
+            printf("Curses! The enemy soldiers' armor have fully blocked the attack! ");
+            printf("The resulting damage is %d\n", damageAgainstEnemy);
+        };
+
+        if (penemyArmy->numbers <= 0)
+        {
+            penemyArmy->numbers = 0;
+        };
+
+        printf("With this attack the enemy has lost %d soldiers\n", damageAgainstEnemy);
+        printf("The enemy now has %d soldiers left\n", (penemyArmy->numbers));
+        printf("The damage against the commander has been %d\n", damAgainstEnComm);
+        printf("The enemy now has %d commander's points\n", penemyArmy->commandersPoints);
+        printf("The enemy's strength is now %.2f\n", penemyArmy->strength);
+
+        battleIsOver = checkBattleOver(pplayersArmy->numbers, penemyArmy->numbers,
+        pplayersArmy->strength, initialPlayersStrength, penemyArmy->strength, initialEnemysStrength);
+
+        if (battleIsOver.battleOver == 1)
+        {
+            return battleIsOver;
+        };
+
+        printf("Press any number to continue...");
+        scanf("%d", &continueNumber);
+
+        enemyValAttack = getRandValueFromRange(&penemyArmy->minAttack, &penemyArmy->maxAttack);
+        printf("The enemy attacks you with %d attack points!\n", enemyValAttack);
+
+        printf("Press any number to continue...");
+        scanf("%d", &continueNumber);
+
+        printf("Press an integer number to roll a dice and defend yourself! ");
+        scanf("%d", &continueNumber);
+        playerValDefense = getRandValueFromRange(&pplayersArmy->minDefense, &pplayersArmy->maxDefense);
+        printf("You've rolled a dice and you defend with %d points!\n", playerValDefense);
+
+        printf("Press any number to continue...");
+        scanf("%d", &continueNumber);
+
+        damageAgainstPlayer = resultingDamage(enemyValAttack, playerValDefense)*50;
+        damAgainstPlayComm = resultingDamage(enemyValAttack, playerValDefense);
+        if (damageAgainstPlayer > 0)
+        {
+            printf("Damnation! The despicable enemy has caused a damage of %d to our soldiers!!\n",
+             damageAgainstPlayer);
+            (pplayersArmy->numbers) -= damageAgainstPlayer;
+            (pplayersArmy->commandersPoints) -= damAgainstPlayComm;
+            (pplayersArmy->strength) = (pplayersArmy->numbers * (pplayersArmy->experience/2)) + pplayersArmy->commandersPoints;
+        } else
+        {
+            printf("Praise our blacksmiths! Our soldiers' strong armor have fully blocked the attack! ");
+            printf("The resulting damage against us is %d\n", damageAgainstPlayer);
+        };
+
+        if (pplayersArmy->numbers <= 0)
+        {
+            pplayersArmy->numbers = 0;
+        };
+
+        printf("With this attack we have lost %d soldiers\n", damageAgainstPlayer);
+        printf("We now have %d soldiers left\n", (pplayersArmy->numbers));
+        printf("The damage against our commander has been %d\n", damAgainstPlayComm);
+        printf("Our commander now has %d commander's points\n", pplayersArmy->commandersPoints);
+        printf("The strength of our army is now %.2f\n", pplayersArmy->strength);
+
+        battleIsOver = checkBattleOver(pplayersArmy->numbers, penemyArmy->numbers,
+        pplayersArmy->strength, initialPlayersStrength, penemyArmy->strength, initialEnemysStrength);
+        if (battleIsOver.battleOver == 1)
+        {
+            return battleIsOver;
+        };
+    };
+};
+
+
+int recruitDefeatSold(struct army * pplayerArmy, float * pamountExtStrenParam, int * penemySoldLeftParam)
+{
+    printf("*penemySoldLeftParam: %d\n", *penemySoldLeftParam);
+
+    printf("Initial player numbers: %d *** Initial player strength: %.2f\n",
+    pplayerArmy->numbers, pplayerArmy->strength);
+    pplayerArmy->numbers += *penemySoldLeftParam;
+    printf("amountExtraStrength: %.2f\n", *pamountExtStrenParam);
+    pplayerArmy->strength -= *pamountExtStrenParam;
+    printf("Player numbers after: %d *** Player strength after: %.2f\n",
+    pplayerArmy->numbers, pplayerArmy->strength);
+
+    *penemySoldLeftParam = 0;
+
+    printf("*penemySoldLeftParam: %d\n", *penemySoldLeftParam);
+
+    return *penemySoldLeftParam;
+};
+
+
+int killDefeatSold(struct army * pplayerArmy, float * pamountExtStrenParam)
+{
+    int enemySoldLeft;
+    printf("You have thus decided to butcher them all! They can't be trusted to join your army, after all. Besides, you"
+    " feel more like providing your foes the cold touch of death than to feel your pockets a little heavier!\n");
+    printf("Strength before: %.2f\n", pplayerArmy->strength);
+
+    pplayerArmy->strength += *pamountExtStrenParam;
+    enemySoldLeft = 0;
+
+    printf("As a result of this action, you haven't gained any extra soldiers, but your army has gained %.2f"
+    " extra points of strength!\n The stench of the enemy's blood smells like a damsel's perfume to your men!\n",
+     *pamountExtStrenParam);
+    printf("Strength after: %.2f\n", pplayerArmy->strength);
+
+    return enemySoldLeft;
+};
+
+
+int negotiation1(struct army * penemyArmy, struct territory * penemyTerritory, int * penemySoldLeftParam,
+ struct army * pplayerArmy, float * pamountExtStrenParam)
+{
+    int continueNumber;
+    int enemySuggestion;
+
+    printf("My liege, the enemy obviously lost soldiers, but they consider this loss to be manageable."
+    " You should be careful when negotiating with them, for they don't seem to care that much about"
+    " the soldier's we've captured from them!\n");
+
+    printf("You have thus decided to ransom the soldiers. Maybe the enemy would be"
+    " be willing to pay good coin for the lives of those weaklings?\n");
+    printf("Press any number to continue: ");
+    scanf("%d", &continueNumber);
+
+    if (penemyTerritory->coinInCoffers > 0)
+    {
+        int ransomMoneyAsk;
+        // This is the maximum amount of money the enemy will be willing to give. Namely,
+        // the cost to recruit a soldier divided by 2 multiplied by the amount of soldiers
+        // left. The enemy believes that these soldiers are worth less.
+        int ransomMoneyMaxGive = (penemyTerritory->costRecruitSoldiers * *penemySoldLeftParam)/2;
+        if (ransomMoneyMaxGive > penemyTerritory->coinInCoffers)
+        {
+            // Because the enemy wouldn't be willing to give all their money for their soldiers,
+            // and want to have some money in their coffers to make investments.
+            ransomMoneyMaxGive = (penemyTerritory->coinInCoffers)*2/3;
+        };
+
+        int count = 0;
+        _Bool negotiationTerminated = false;
+        _Bool negotiationContinues = false;
+
+        for (count = 0; count < 6; count++)
+        {
+            if (negotiationTerminated == true)
+            {
+                break;
+            };
+
+            negotiationContinues = false;
+            int minEnemySuggestion;
+
+            printf("\n===Round of negotiation number: %d===\n", count);
+
+            while (true)
+            {
+                printf("How much money would you like to ask? ");
+                scanf("%d", &ransomMoneyAsk);
+                if (count >= 1 && ransomMoneyAsk >= enemySuggestion)
+                {
+                    printf("The enemy says we are now asking for a value that is greater than or equal to the previous one."
+                    " So we should suggest a smaller value for the negotiation to continue.\n");
+                } else if (count >= 0 && ransomMoneyAsk > ransomMoneyMaxGive)
+                {
+                    printf("According to our negotiators, the maximum value the enemy is willing "
+                    "to negotiate with is %d.\nSo since, according to them, we seem so intent on making such "
+                    "absurd offers, they have demanded that we make another offer.\n",
+                    ransomMoneyMaxGive);
+                } else
+                {
+                    printf("The enemy says this is a reasonable offer. Let's see if they accept...\n");
+                    break;
+                };
+            };
+
+            float tempFloat = ransomMoneyAsk/3;
+            minEnemySuggestion = (int)tempFloat;
+
+            enemySuggestion = getRandValueFromRange(&minEnemySuggestion, &ransomMoneyAsk);
+
+            while (negotiationContinues == false)
+            {
+                int playerNegotChoice;
+
+                printf("\n=============\n");
+
+                if (ransomMoneyAsk > ransomMoneyMaxGive)
+                {
+                    printf("The enemy would only be willing to give at maximum %d gold coins.\n",
+                    ransomMoneyMaxGive);
+                    break;
+                } else
+                {
+                    while (true)
+                    {
+                        if (enemySuggestion > 0)
+                        {
+                            printf("\t-> The enemy suggests the value of %d. Do you accept? \n", enemySuggestion);
+                            printf("Press 1 for 'Yes' and 0 for 'No': ");
+                            scanf("%d", &playerNegotChoice);
+                        } else
+                        {
+                            printf("The enemy doesn't wish to discuss anymore. They say that we should do whatever pleases us with"
+                            " their soldiers.\n");
+                            enemySuggestion = 0;
+                            negotiationContinues = true;
+                            negotiationTerminated = true;
+                            break;
+                        };
+
+                        if (playerNegotChoice == 1)
+                        {
+                            printf("We have accepted the enemy's counter-offer. Our foes are glad that we have come to an agreement!\n");
+                            printf("The player has accepted.\n");
+                            penemyTerritory->coinInCoffers -= enemySuggestion;
+                            negotiationContinues = true;
+                            negotiationTerminated = true;
+                            break; // Break out of the while(true) loop
+                        } else if (playerNegotChoice == 0)
+                        {
+                            if (count >= 5)
+                            {
+                                printf("The enemy doesn't wish to discuss anymore. They say that we should do whatever pleases us with"
+                                " their soldiers.\n");
+                                enemySuggestion = 0;
+                                negotiationContinues = true;
+                                negotiationTerminated = true;
+                                break;
+                            } else
+                            {
+                                printf("Ok, then let's continue with the negotiation.\n");
+                                negotiationContinues = true;
+                                break;
+                            };
+                        } else
+                        {
+                            printf("Invalid answer.\n");
+                        };
+                    };
+                };
+            };
+        };
+    } else
+    {
+        printf("My lord, our negotiators say that the enemy doesn't even want to start negotiations for their"
+        " captured soldiers. Maybe their coffers are empty...?\n");
+        enemySuggestion = 0;
+    };
+
+    if (enemySuggestion > 0)
+    {
+        printf("The negotiation was sucessful, and you have agreed to ransom the enemy's %d soldiers for"
+        " %d gold coins.\n", *penemySoldLeftParam, enemySuggestion);
+
+        printf("Before the enemy's numbers were %d\n", penemyArmy->numbers);
+
+        penemyArmy->numbers += *penemySoldLeftParam;
+
+        printf("Now the enemy has %d soldiers.\n", penemyArmy->numbers);
+
+    } else
+    {
+        while (true)
+        {
+            int finalChoiceEnSoldiers;
+            printf("Apparently you haven't come to an agreement. What will you then do with the enemy's soldiers?\n");
+            printf("My lord, as before, you are presented with the same options of either killing them all or recruiting them."
+            " What are you going to do?\nPress 1 to recruit them and 0 to kill them: ");
+            scanf("%d", &finalChoiceEnSoldiers);
+
+            if (finalChoiceEnSoldiers == 0)
+            {
+                killDefeatSold(pplayerArmy, pamountExtStrenParam);
+                break;
+            } else if (finalChoiceEnSoldiers == 1)
+            {
+                recruitDefeatSold(pplayerArmy, pamountExtStrenParam, penemySoldLeftParam);
+                break;
+            } else
+            {
+                printf("Please insert a valid answer.\n");
+            };
+        };
+    };
+    return enemySuggestion;
+};
+
+
+int negotiation2(struct army * penemyArmy, struct army * pplayersArmy, struct territory * penemyTerritory,
+struct territory * pplayersTerritory, int * penemySoldLeftParam, float * pamountExtStrenParam)
+{
+    int continueNumber;
+    int enemySuggestion;
+    _Bool enemyCoffersEmpty = false;
+
+    printf("My lord, keep in mind that the enemy took a good beating by our forces after the battle, but not so"
+    " much that it would make them desperate to get their soldiers back.\n");
+
+    printf("You have thus decided to ransom the soldiers. Maybe the enemy would be"
+    " be willing to pay good coin for the lives of those weaklings?\n");
+    printf("Press any number to continue: ");
+    scanf("%d", &continueNumber);
+
+    if (penemyTerritory->coinInCoffers > 0)
+    {
+        int ransomMoneyAsk;
+        // This is the maximum amount of money the enemy will be willing to give. Namely,
+        // the cost to recruit a soldier divided by 2 multiplied by the amount of soldiers
+        // left. The enemy believes that these soldiers are worth less.
+        int ransomMoneyMaxGive = (penemyTerritory->costRecruitSoldiers * *penemySoldLeftParam)/2;
+        if (ransomMoneyMaxGive > penemyTerritory->coinInCoffers)
+        {
+            // Because the enemy wouldn't be willing to give all their money for their soldiers,
+            // and want to have some money in their coffers to make investments.
+            ransomMoneyMaxGive = (penemyTerritory->coinInCoffers)*2/3;
+        };
+
+        int count;
+        for (count = 0; count < 6; count++)
+        {
+            int minEnemySuggestion;
+
+            float tempFloat;
+
+            int newMinEnSuggestion = 2;
+            int newMaxEnSuggestion = 5;
+            int * pnewMinEnSuggestion = &newMinEnSuggestion;
+            int * pnewMaxEnSuggestion = &newMaxEnSuggestion;
+            int randomValue;
+            int difference;
+            int playersAnswer;
+
+            printf("How much money would you like to ask? ");
+            scanf("%d", &ransomMoneyAsk);
+
+            if (ransomMoneyAsk >= ransomMoneyMaxGive)
+            {
+                ransomMoneyAsk = ransomMoneyMaxGive;
+                printf("According to our negotiators, the maximum value the enemy is willing "
+                "to negotiate with is %d.\nSo since, according to them, we seem so intent on making such "
+                "absurd offers, they will consider this maximum value to be our current offer.\n",
+                ransomMoneyAsk);
+            };
+
+            printf("You have offered %d gold coins for the prisoners.\n", ransomMoneyAsk);
+            randomValue = getRandValueFromRange(pnewMinEnSuggestion, pnewMaxEnSuggestion);
+            printf("Random value: %d\n", randomValue);
+
+            if (count == 0)
+            {
+                tempFloat = ransomMoneyAsk/randomValue;
+                minEnemySuggestion = (int)tempFloat;
+                printf("Count = %d || minEnemySuggestion: %d\n", count, minEnemySuggestion);
+            } else
+            {
+                minEnemySuggestion = enemySuggestion;
+                printf("Count = %d || minEnemySuggestion: %d\n", count, minEnemySuggestion);
+            };
+
+            difference = ransomMoneyAsk - minEnemySuggestion;
+            printf("Difference: %d\n", difference);
+            enemySuggestion = getRandValueFromRange(&minEnemySuggestion, &ransomMoneyAsk);
+
+            _Bool validAnswer = false;
+            while (validAnswer == false)
+            {
+                int playersAnswer2;
+                printf("My liege, the enemy's current offer is %d\nDo you accept? Press 1 for 'Yes' and"
+                " 0 for 'No' ", enemySuggestion);
+                scanf("%d", &playersAnswer);
+
+                if (playersAnswer == 1)
+                {
+                    printf("The enemy is glad we have reached an agreement!\n");
+                    printf("The enemy gave you %d gold coins\n", enemySuggestion);
+                    printf("Before the negotiation you had %d gold coins\n", pplayersTerritory->coinInCoffers);
+                    penemyTerritory->coinInCoffers -= enemySuggestion;
+                    printf("Now they have %d gold.\n", penemyTerritory->coinInCoffers);
+
+                    printf("Before the enemy's numbers were %d\n", penemyArmy->numbers);
+                    penemyArmy->numbers += *penemySoldLeftParam;
+                    printf("Now the enemy has %d soldiers.\n", penemyArmy->numbers);
+                    return enemySuggestion;
+                } else if (playersAnswer == 0)
+                {
+                    while (true)
+                    {
+                        printf("Would you like to try to make a new offer? Press 1 for 'Yes' and 0 for 'No' ");
+                        scanf("%d", &playersAnswer2);
+
+                        if (playersAnswer2 == 1)
+                        {
+                            printf("Then let's try to make a new offer.\n");
+                            validAnswer = true;
+                            break;
+                        } else if (playersAnswer2 == 0)
+                        {
+                            printf("Then there is nothing else to discuss, and the negotiation has been terminated.\n");
+                            enemySuggestion = 0;
+                            count = 5;
+                            validAnswer = true;
+                            break;
+                        } else
+                        {
+                            printf("Please type in a valid answer.\n");
+                        };
+                    };
+                } else
+                {
+                    printf("Please type in a valid answer.\n");
+                };
+            };
+        };
+    } else
+    {
+        printf("My lord, our negotiators say that the enemy doesn't even want to start negotiations for their"
+        " captured soldiers. Maybe their coffers are empty...?\n");
+        enemySuggestion = 0;
+        enemyCoffersEmpty = true;
+    };
+
+    if (enemyCoffersEmpty == false)
+    {
+        printf("My lord, the enemy said it won't try to reason with us anymore, and have thus decided to drop"
+        " any attempts of continuing this conversation.\n");
+    };
+
+    while (true)
+    {
+        int finalChoice;
+        printf("Since you and the enemy haven't been able to reach and agreement, you now "
+        "have to decide what to do with the prisoners. Are you going to kill them all, or are you"
+        " going to recruit them? \nPress 0 if you want to kill them and 1 if you want to recruit "
+        "them: ");
+        scanf("%d", &finalChoice);
+        if (finalChoice == 0)
+        {
+            killDefeatSold(pplayersArmy, pamountExtStrenParam);
+            break;
+        } else if (finalChoice == 1)
+        {
+            recruitDefeatSold(pplayersArmy, pamountExtStrenParam, penemySoldLeftParam);
+            break;
+        } else
+        {
+            printf("Please type in a valid answer.\n");
+        };
+    };
+};
+
+
+int negotiation3(struct army * penemyArmy, struct army * pplayersArmy, struct territory * penemyTerritory,
+struct territory * pplayersTerritory, int * penemySoldLeftParam, float * pamountExtStrenParam)
+{
+    int continueNumber;
+    int enemySuggestion = 0;
+
+    printf("My lord, we have observed that the enemy's numbers have been so depleted after the battle, that they"
+    " seem desperate to get at least some of their soldiers back with this negotiation. Be sure to use this to your"
+    " advantage!\n");
+
+    printf("You have thus decided to ransom the soldiers. Maybe the enemy would be be willing to pay good coin for "
+    "the lives of those weaklings?\n");
+    printf("Press any number to continue: ");
+    scanf("%d", &continueNumber);
+
+    if (penemyTerritory->coinInCoffers > 0)
+    {
+        int ransomMoneyAsk;
+        // This is the maximum amount of money the enemy will be willing to give. Namely,
+        // the cost to recruit a soldier divided by 2 multiplied by the amount of soldiers
+        // left. The enemy believes that these soldiers are worth less.
+        int ransomMoneyMaxGive = (penemyTerritory->costRecruitSoldiers * *penemySoldLeftParam)/2;
+        if (ransomMoneyMaxGive > penemyTerritory->coinInCoffers)
+        {
+            // Because the enemy wouldn't be willing to give all their money for their soldiers,
+            // and want to have some money in their coffers to make investments.
+            ransomMoneyMaxGive = (penemyTerritory->coinInCoffers)*2/3;
+        };
+
+        while (true)
+        {
+            printf("My lord, how much money would you like to ask for those %d captured enemy soldiers? ",
+            *penemySoldLeftParam);
+            scanf("%d", &ransomMoneyAsk);
+
+            if (ransomMoneyAsk > ransomMoneyMaxGive)
+            {
+                printf("Your majesty, the enemy would only be willing to give us at maximum %d gold coins"
+                " for those %d soldiers.\nChoose another value.\n", ransomMoneyMaxGive, *penemySoldLeftParam);
+            } else
+            {
+                printf("The desperate enemy has agreed with our demands!\n");
+                printf("Enemy's suggestion before: %d\n", enemySuggestion);
+                printf("Enemy's coffers before: %d\n", penemyTerritory->coinInCoffers);
+                printf("Enemy's numbers before: %d\n", penemyArmy->numbers);
+                enemySuggestion = ransomMoneyAsk;
+                penemyTerritory->coinInCoffers -= enemySuggestion;
+                penemyArmy->numbers += *penemySoldLeftParam;
+                printf("Enemy's suggestion AFTER: %d\n", enemySuggestion);
+                printf("Enemy's coffers AFTER: %d\n", penemyTerritory->coinInCoffers);
+                printf("Enemy's numbers AFTER: %d\n", penemyArmy->numbers);
+                return enemySuggestion;
+            };
+        };
+    } else {
+        printf("My lord, our negotiators say that the enemy doesn't even want to start negotiations for their"
+        " captured soldiers. Maybe their coffers are empty...?\n");
+        enemySuggestion = 0;
+    };
+
+    while (true)
+    {
+        int finalChoice;
+        printf("Since you and the enemy haven't been able to reach and agreement, you now have to decide what to"
+        " do with the prisoners. Are you going to kill them all, or are you going to recruit them? \nPress 0 if you"
+        " want to kill them and 1 if you want to recruit them: ");
+        scanf("%d", &finalChoice);
+        if (finalChoice == 0)
+        {
+            killDefeatSold(pplayersArmy, pamountExtStrenParam);
+            break;
+        } else if (finalChoice == 1)
+        {
+            recruitDefeatSold(pplayersArmy, pamountExtStrenParam, penemySoldLeftParam);
+            break;
+        } else
+        {
+            printf("Please type in a valid answer.\n");
+        };
+    };
+
+    return enemySuggestion;
+};
+
+
+void aftermathBattle (struct battleOverStruct * paftermathBattleStructParam, struct army * pplayerStruct,
+struct army * penemyStruct, struct territory * pplayerTerritory, struct territory * penemyTerritory,
+int befBattlePlayNums, int befBattleEnNums)
+{
+    int enemySoldLeft = penemyStruct->numbers / 3;
+    penemyStruct->numbers -= enemySoldLeft;
+    int tempGoldInPossession;
+    int ransomMoney;
+
+    int continueNumber;
+
+    if (paftermathBattleStructParam->battleWon == 1)
+    {
+        printf("The battle has been won! The enemy is utterly beaten, and you have conquered their "
+        "territory! \n");
+        // Print the stats of the soldiers, commander etc
+        if (penemyStruct->baggageTrain > 0)
+        {
+            printf("After looting the enemy's camp, you have found their baggage train, and have added"
+            " its gold to your own!\nThe enemy had %d gold coins, and before the battle you had %d\n",
+            penemyStruct->baggageTrain, pplayerStruct->baggageTrain);
+
+            tempGoldInPossession = penemyStruct->baggageTrain;
+            //pplayerStruct->baggageTrain += penemyStruct->baggageTrain;
+
+            printf("Now the amount of gold in your possession is %d!\n", tempGoldInPossession);
+            //printf("Now the amount of gold in your possession is %d!\n", pplayerStruct->baggageTrain);
+        } else if (penemyStruct->baggageTrain <= 0)
+        {
+            penemyStruct->baggageTrain = 0;
+            printf("Ha! It seems that besides being weaklings, the enemies were also bankrupt!\n"
+            "After searching their camp, you have found nothing of value, as their baggage train had"
+            " no coins.\n");
+        };
+
+        printf("Press any number to continue: ");
+        scanf("%d", &continueNumber);
+        if (enemySoldLeft > 0)
+        {
+            int choice;
+            float amountExtraStrength = enemySoldLeft/2.0;
+
+            printf("After the battle %d enemy soldiers fled the field, and in their camp there were"
+            " %d enemy soldiers left\n", penemyStruct->numbers, enemySoldLeft);
+            while (true)
+            {
+                printf("What are you going to do with them? If you decide to recruit them, you will gain more "
+                "soldiers, but due to your own soldiers suspicions about their former enemies, your army will "
+                "lose strength. Alternatively, you can also ransom them to the enemy for coin, or you can "
+                "decide to kill them all!\n");
+                printf("Press 1 to recruit them, 2 to ransom them or 0 to butcher them! ");
+                scanf("%d", &choice);
+                if (choice == 1)
+                {
+                    enemySoldLeft = recruitDefeatSold(pplayerStruct, &amountExtraStrength, &enemySoldLeft);
+                    printf("enemySoldLeft out of the function: %d\n", enemySoldLeft);
+                    break;
+                } else if (choice == 0)
+                {
+                    // Insert here the function to kill the soldiers.
+                    enemySoldLeft = killDefeatSold(pplayerStruct, &amountExtraStrength);
+                    printf("\nEnemy Soldiers left: %d\n", enemySoldLeft);
+                    break;
+                } else if (choice == 2) // INSERT THE NEGOTIATION FUNCTION HERE!
+                {
+                    float totalEnemAftBatt = enemySoldLeft + penemyStruct->numbers;
+
+                    printf("totalEnemAftBatt = %.2f\n", totalEnemAftBatt);
+                    printf("befBattleEnNums (enemy numbers before the battle) = %d\n", befBattleEnNums);
+                    printf("befBattleEnNums / totalEnemAftBatt  = %.2f\n", (float)totalEnemAftBatt/(float)befBattleEnNums );
+                    printf("totalEnemAftBatt / 3 = %.2f\n", (float)totalEnemAftBatt / 3);
+
+                    //if ((float)totalEnemAftBatt >= (befBattleEnNums / 3))
+                    if ((float)totalEnemAftBatt >= (befBattleEnNums / 2))
+                    {
+                        printf("\nThis is negotiation 1\n");
+                        ransomMoney = negotiation1(penemyStruct, penemyTerritory, &enemySoldLeft, pplayerStruct, &amountExtraStrength);
+                        break;
+                        // Call negotiation1
+                    } else if (befBattleEnNums / 2 > (float)totalEnemAftBatt && (float)totalEnemAftBatt  >= (befBattleEnNums / 3))
+                    {
+                        printf("\nThis is negotiation 2\n");
+                        ransomMoney = negotiation2(penemyStruct, pplayerStruct, penemyTerritory, pplayerTerritory, &enemySoldLeft, &amountExtraStrength);
+                        break;
+                        // Call negotiation2
+                    } else
+                    {
+                        printf("\nThis is negotiation 3\n");
+                        ransomMoney = negotiation3(penemyStruct, pplayerStruct, penemyTerritory, pplayerTerritory, &enemySoldLeft, &amountExtraStrength);
+                        break;
+                        // Call negotiation3
+                    };
+                }else
+                {
+                    printf("Please type in a valid answer.\n");
+                };
+            };
+        } else {
+            enemySoldLeft = 0;
+            noEnemyLeftStren = 150;
+            printf("My lord, it seems that the enemy's soldiers were all slaughtered to the last man by our forces"
+            " during the battle! This is a complete victory indeed!\n");
+            pplayerStruct->strength += noEnemyLeftStren;
+            printf("\n============\n");
+            printf("As a result of this, our army has gained an addition %d points of strength, bringing our total"
+            " strength to %d!\n", noEnemyLeftStren, pplayerStruct->strength);
+            // Player gets the same amount of strength as it would get if it slaughtered the prisoners
+        };
+
+        printf("Temporary gold in possession BEFORE: %d\n", tempGoldInPossession);
+        tempGoldInPossession += ransomMoney;
+        printf("Temporary gold in possession AFTER: %d\n", tempGoldInPossession);
+
+        if (tempGoldInPossession > 0)
+        {
+            int choiceExtraGold;
+            int moneyToBaggTrain;
+            //int moneyToCoffers;
+
+            printf("Press any number to continue: ");
+            scanf("%d", &continueNumber);
+            printf("My lord, now you need to decide what to do with the extra money you've taken"
+            " from the enemy, both in their camp and as ransom money.\n");
+            printf("\t-> Your baggage train's money is %d\n\t-> The money in your capital's coffers is %d\n"
+            "\t-> And the money taken from the enemy is %d\n", pplayerStruct->baggageTrain,
+            pplayerTerritory->coinInCoffers, tempGoldInPossession);
+
+            while(true)
+            {
+                printf("What are you going to do with all the extra money?\n\t-> Press 1 to add all of it to"
+                " your baggage train (remember that an army without money can't buy food!)\n\t"
+                "-> Press 2 to add all of it to your capital's coffers\n\t"
+                "-> Press 3 to add part of it to your capital's coffers and part of it to your baggage train.\n");
+                scanf("%d", &choiceExtraGold);
+
+                if (choiceExtraGold == 1)
+                {
+                    pplayerStruct->baggageTrain += tempGoldInPossession;
+                    printf("My lord, now your baggage train has %d gold coins.\n", pplayerStruct->baggageTrain);
+                    break;
+                } else if (choiceExtraGold == 2)
+                {
+                    pplayerTerritory->coinInCoffers += tempGoldInPossession;
+                    printf("My liege, now your glorious capital's coffers have %d gold coins.\n", pplayerTerritory->coinInCoffers);
+                    break;
+                } else if (choiceExtraGold == 3)
+                {
+                    while (true)
+                    {
+                        printf("The money you took from the enemy amounts to %d gold coins.\n", tempGoldInPossession);
+                        printf("How much money would you like to add to your baggage train? ");
+                        scanf("%d", &moneyToBaggTrain);
+
+                        if (moneyToBaggTrain > tempGoldInPossession || moneyToBaggTrain < 0)
+                        {
+                            printf("The amount of money you've entered is either more than you have in possession, "
+                            "or less than zero. Please type in a valid number. \n");
+                        } else
+                        {
+                            printf("Your baggage train had %d gold coins before.\n", pplayerStruct->baggageTrain);
+                            printf("%d gold coins have been added to your baggage train.\n", moneyToBaggTrain);
+                            pplayerStruct->baggageTrain += moneyToBaggTrain;
+                            printf("Your baggage train now has %d gold coins.\n", pplayerStruct->baggageTrain);
+                            tempGoldInPossession -= moneyToBaggTrain;
+                            printf("Now the money you took from the enemy amounts to %d gold coins.\n", tempGoldInPossession);
+                            break;
+                        };
+                    };
+
+                    if (tempGoldInPossession <= 0)
+                    {
+                        printf("Before your coffers had %d gold coins.\n", pplayerTerritory->coinInCoffers);
+                        tempGoldInPossession = 0;
+                        printf("My lord, the money you took from the enemy now amounts to %d gold coins, and so there"
+                        " is nothing left to be added to your coffers.\n", tempGoldInPossession);
+                        printf("The gold in your coffers amounts to %d gold coins.\n", pplayerTerritory->coinInCoffers);
+                        break;
+                    } else
+                    {
+                        printf("Before your coffers had %d gold coins.\n", pplayerTerritory->coinInCoffers);
+                        printf("My lord, since the remainder of the money you took from the enemy now amounts to %d"
+                        " gold coins, this value has been added to your coffers.\n", tempGoldInPossession);
+                        pplayerTerritory->coinInCoffers += tempGoldInPossession;
+                        printf("The gold in your coffers now amounts to %d gold coins.\n", pplayerTerritory->coinInCoffers);
+                        break;
+                    };
+                } else
+                {
+                    printf("Please type in a valid answer.\n");
+                };
+            };
+        } else
+        {
+            printf("My lord, since the enemy's army had no money at all in their possession, there are no"
+            " issues that need addressing at this moment.\n");
+        };
+
+        printf("My lord, now it is time to return to our capital and rejoice for this glorious victory!\n");
+    } else if (paftermathBattleStructParam->battleWon == 0)
+    {
+        // Will be implemented in the future.
+        printf("The battle has been lost! You have been utterly defeated\n");
+    };
+};
